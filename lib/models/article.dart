@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Article {
   final String id;
   final String title;
@@ -7,7 +9,7 @@ class Article {
   final String url;
   final String imageUrl;
   final DateTime publishedAt;
-  final String sentiment; // 'Positive', 'Neutral', 'Negative'
+  final String sentiment;
 
   Article({
     required this.id,
@@ -21,17 +23,37 @@ class Article {
     required this.sentiment,
   });
 
-  factory Article.fromJson(Map<String, dynamic> json) {
+  factory Article.fromJson(Map<String, dynamic> json, String calculatedSentiment) {
+    String desc = json['description'] ?? 'No description available.';
+    // Graceful Image Fallbacks
+    String? img = json['image_url'];
+    if (img == null || img.isEmpty || img.contains('null')) {
+      img = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&auto=format&fit=crop';
+    }
+    
     return Article(
-      id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      summary: json['summary'] ?? '',
+      id: json['article_id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      title: json['title'] ?? 'No Title',
+      summary: desc, 
       content: json['content'] ?? '',
-      sourceName: json['sourceName'] ?? '',
-      url: json['url'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      publishedAt: DateTime.tryParse(json['publishedAt'] ?? '') ?? DateTime.now(),
-      sentiment: json['sentiment'] ?? 'Neutral',
+      sourceName: json['source_id'] ?? 'NewsProvider',
+      url: json['link'] ?? '',
+      imageUrl: img,
+      publishedAt: DateTime.tryParse(json['pubDate'] ?? '') ?? DateTime.now(),
+      sentiment: calculatedSentiment,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'article_id': id,
+      'title': title,
+      'description': summary,
+      'content': content,
+      'source_id': sourceName,
+      'link': url,
+      'image_url': imageUrl,
+      'pubDate': publishedAt.toIso8601String(),
+    };
   }
 }
