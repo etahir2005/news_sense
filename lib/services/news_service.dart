@@ -41,10 +41,10 @@ class NewsService {
           'nextPage': nextToken,
         };
       } else {
-        throw Exception('Failed to load news: \${response.statusCode}');
+        throw Exception('Failed to load news: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Error fetching news: \$e');
+      throw Exception('Error fetching news: $e');
     }
   }
 

@@ -12,50 +12,51 @@ class BookmarksScreen extends StatefulWidget {
 
 class _BookmarksScreenState extends State<BookmarksScreen> {
   final BookmarksService _service = BookmarksService();
-  List<Article> _savedArticles = [];
+  List<Article> _saved = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadBookmarks();
+    _load();
   }
 
-  Future<void> _loadBookmarks() async {
-    setState(() => _isLoading = true);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _load(); // Refresh when navigating back
+  }
+
+  Future<void> _load() async {
     final cache = await _service.getBookmarks();
-    if (mounted) {
-      setState(() {
-        _savedArticles = cache;
-        _isLoading = false;
-      });
-    }
+    if (mounted) setState(() { _saved = cache; _isLoading = false; });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: const Text('Saved for Later', style: TextStyle(fontWeight: FontWeight.bold))),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator()) 
-        : _savedArticles.isEmpty 
+      appBar: AppBar(title: const Text('Saved Articles', style: TextStyle(fontWeight: FontWeight.bold))),
+      body: _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : _saved.isEmpty
           ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.bookmark_border, size: 80, color: Colors.grey.withOpacity(0.5)),
-                  const SizedBox(height: 16),
-                  const Text('No articles saved yet.', style: TextStyle(fontSize: 18, color: Colors.grey)),
-                ],
+              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Icon(Icons.bookmark_outline, size: 80, color: Colors.grey.withOpacity(0.4)),
+                const SizedBox(height: 16),
+                const Text('No saved articles yet.', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                const SizedBox(height: 8),
+                Text('Tap the bookmark icon on any article to save it.', style: TextStyle(fontSize: 13, color: Colors.grey[400])),
+              ]),
+            )
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _saved.length,
+                itemBuilder: (context, index) => NewsCard(article: _saved[index]),
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _savedArticles.length,
-              itemBuilder: (context, index) {
-                return NewsCard(article: _savedArticles[index]);
-              },
-            )
+            ),
     );
   }
 }
