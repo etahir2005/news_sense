@@ -58,14 +58,38 @@ class _HomeScreenState extends State<HomeScreen> {
                       end: Alignment.bottomRight,
                     ),
                   ),
-                  child: const SafeArea(
+                  child: SafeArea(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(20, 8, 20, 0),
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('NewsSense', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-                          Text('Smart Insights · Pakistan 🇵🇰', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('NewsSense', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+                              // Global/Local Toggle
+                              Consumer<NewsProvider>(
+                                builder: (context, provider, child) {
+                                  return Container(
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black26,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _buildToggleBtn('Local', !provider.isGlobal, () => provider.setGlobal(false)),
+                                        _buildToggleBtn('Global', provider.isGlobal, () => provider.setGlobal(true)),
+                                      ],
+                                    ),
+                                  );
+                                }
+                              )
+                            ],
+                          ),
+                          const Text('Smart AI Insights & Radar', style: TextStyle(color: Colors.white70, fontSize: 14)),
                         ],
                       ),
                     ),
@@ -310,6 +334,27 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildToggleBtn(String label, bool isActive, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isActive ? const Color(0xFF667eea) : Colors.white70,
+            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            fontSize: 12,
+          ),
+        ),
+      ),
     );
   }
 }

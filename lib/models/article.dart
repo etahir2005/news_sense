@@ -10,6 +10,8 @@ class Article {
   final String imageUrl;
   final DateTime publishedAt;
   final String sentiment;
+  final int credibilityScore;
+  final bool isGlobal;
 
   Article({
     required this.id,
@@ -21,9 +23,11 @@ class Article {
     required this.imageUrl,
     required this.publishedAt,
     required this.sentiment,
+    required this.credibilityScore,
+    required this.isGlobal,
   });
 
-  factory Article.fromJson(Map<String, dynamic> json, String calculatedSentiment) {
+  factory Article.fromJson(Map<String, dynamic> json, String calculatedSentiment, int calculatedCredibility, bool global) {
     String desc = json['description'] ?? 'No description available.';
     // Graceful Image Fallbacks
     String? img = json['image_url'];
@@ -41,6 +45,8 @@ class Article {
       imageUrl: img,
       publishedAt: DateTime.tryParse(json['pubDate'] ?? '') ?? DateTime.now(),
       sentiment: calculatedSentiment,
+      credibilityScore: calculatedCredibility,
+      isGlobal: global,
     );
   }
 
@@ -54,6 +60,9 @@ class Article {
       'link': url,
       'image_url': imageUrl,
       'pubDate': publishedAt.toIso8601String(),
+      'sentiment': sentiment,
+      'credibilityScore': credibilityScore,
+      'isGlobal': isGlobal,
     };
   }
 }

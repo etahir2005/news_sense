@@ -6,12 +6,12 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     
     // Check if user already exists
-    if (prefs.containsKey('user_\$email')) {
+    if (prefs.containsKey('user_$email')) {
       return false; // User exists
     }
 
     // Save basic auth locally
-    await prefs.setString('user_\$email', password);
+    await prefs.setString('user_$email', password);
     await prefs.setString('currentUser', email);
     return true;
   }
@@ -20,7 +20,7 @@ class AuthService {
   Future<bool> login(String email, String password) async {
     final prefs = await SharedPreferences.getInstance();
     
-    String? savedPassword = prefs.getString('user_\$email');
+    String? savedPassword = prefs.getString('user_$email');
     if (savedPassword != null && savedPassword == password) {
       await prefs.setString('currentUser', email);
       return true;

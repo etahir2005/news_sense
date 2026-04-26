@@ -318,6 +318,49 @@ class _NewsCardState extends State<NewsCard> with SingleTickerProviderStateMixin
                     ),
                     const SizedBox(height: 12),
 
+                    // Unique Feature: Clickbait & Bias Radar
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Credibility Radar',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey[500]),
+                            ),
+                            Text(
+                              widget.article.credibilityScore > 80 ? 'Highly Objective' 
+                              : widget.article.credibilityScore > 50 ? 'Slight Bias' 
+                              : 'Possible Clickbait',
+                              style: TextStyle(
+                                fontSize: 11, 
+                                fontWeight: FontWeight.bold, 
+                                color: widget.article.credibilityScore > 80 ? const Color(0xFF2ECC71)
+                                  : widget.article.credibilityScore > 50 ? Colors.orange
+                                  : const Color(0xFFE74C3C),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: widget.article.credibilityScore / 100,
+                            minHeight: 6,
+                            backgroundColor: Colors.grey.withOpacity(0.2),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              widget.article.credibilityScore > 80 ? const Color(0xFF2ECC71)
+                              : widget.article.credibilityScore > 50 ? Colors.orange
+                              : const Color(0xFFE74C3C),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
                     // Action Row
                     Row(
                       children: [

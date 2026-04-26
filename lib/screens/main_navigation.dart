@@ -3,6 +3,8 @@ import 'home_screen.dart';
 import 'analytics_screen.dart';
 import 'profile_screen.dart';
 import 'bookmarks_screen.dart';
+import 'swipe_news_screen.dart';
+import 'digest_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -16,8 +18,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
+    SwipeNewsScreen(),
+    DigestScreen(),
     BookmarksScreen(),
-    AnalyticsScreen(),
     ProfileScreen(),
   ];
 
@@ -38,12 +41,16 @@ class _MainNavigationState extends State<MainNavigation> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Saved',
+            icon: Icon(Icons.swipe),
+            label: 'Swipe',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.pie_chart),
-            label: 'Analytics',
+            icon: Icon(Icons.newspaper),
+            label: 'Digest',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark),
+            label: 'Saved',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

@@ -13,7 +13,8 @@ class NewsProvider with ChangeNotifier {
 
   // Advanced Filters
   String _currentCategory = 'top';
-  String _currentSearch = 'pakistan';
+  String _currentSearch = '';
+  bool _isGlobal = false;
 
   List<Article> get articles => _articles;
   bool get isLoading => _isLoading;
@@ -21,6 +22,7 @@ class NewsProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get hasMore => _nextPageToken != null;
   String get currentCategory => _currentCategory;
+  bool get isGlobal => _isGlobal;
 
   NewsProvider() {
     fetchInitialNews();
@@ -34,11 +36,13 @@ class NewsProvider with ChangeNotifier {
   }
 
   void setSearch(String query) {
-    if (query.isEmpty) {
-      _currentSearch = 'pakistan'; // Default falback
-    } else {
-      _currentSearch = query;
-    }
+    _currentSearch = query;
+    fetchInitialNews();
+  }
+
+  void setGlobal(bool global) {
+    if (_isGlobal == global) return;
+    _isGlobal = global;
     fetchInitialNews();
   }
 
@@ -51,6 +55,7 @@ class NewsProvider with ChangeNotifier {
       final response = await _service.fetchLiveNews(
         query: _currentSearch,
         category: _currentCategory,
+        isGlobal: _isGlobal,
       );
       _articles = response['articles'];
       _nextPageToken = response['nextPage'];
@@ -72,6 +77,7 @@ class NewsProvider with ChangeNotifier {
       final response = await _service.fetchLiveNews(
         query: _currentSearch,
         category: _currentCategory,
+        isGlobal: _isGlobal,
         nextPage: _nextPageToken,
       );
       _articles.addAll(response['articles']);

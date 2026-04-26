@@ -11,7 +11,7 @@ class BookmarksService {
     if (data == null || data.isEmpty) return [];
 
     List<dynamic> jsonList = jsonDecode(data);
-    return jsonList.map((json) => Article.fromJson(json, 'Saved')).toList();
+    return jsonList.map<Article>((json) => Article.fromJson(json, 'Saved', 100, false)).toList();
   }
 
   Future<void> saveBookmark(Article article) async {
