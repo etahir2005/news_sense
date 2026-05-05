@@ -1,42 +1,50 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
-  // Signs up a user by saving their credentials locally
-  Future<bool> signUp(String email, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    // Check if user already exists
-    if (prefs.containsKey('user_$email')) {
-      return false; // User exists
-    }
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-    // Save basic auth locally
-    await prefs.setString('user_$email', password);
-    await prefs.setString('currentUser', email);
-    return true;
+  // Signs up a user via Firebase Auth and creates Firestore profile
+  Future<bool> signUp(String email, String password) async {
+    try {
+      UserCredential cred = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      if (cred.user != null) {
+        await _firestore.collection('users').doc(cred.user!.uid).set({
+          'email': email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+      return true;
+    } catch (e) {
+      print("SignUp Error: $e");
+      return false;
+    }
   }
 
-  // Logs a user in by checking saved credentials
+  // Logs a user in via Firebase
   Future<bool> login(String email, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    String? savedPassword = prefs.getString('user_$email');
-    if (savedPassword != null && savedPassword == password) {
-      await prefs.setString('currentUser', email);
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
       return true;
+    } catch (e) {
+      print("Login Error: $e");
+      return false;
     }
-    return false;
   }
 
   // Logs out
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('currentUser');
+    await _auth.signOut();
   }
 
-  // Checks if someone is currently logged in
+  // Checks if someone is currently logged in (returns UID)
   Future<String?> getCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('currentUser');
+    return _auth.currentUser?.uid;
+  }
+
+  // Get current user email
+  Future<String?> getCurrentUserEmail() async {
+    return _auth.currentUser?.email;
   }
 }

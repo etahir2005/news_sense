@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 class Article {
   final String id;
@@ -33,6 +34,11 @@ class Article {
     String? img = json['image_url'];
     if (img == null || img.isEmpty || img.contains('null')) {
       img = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&auto=format&fit=crop';
+    }
+    
+    // On web, use a CORS proxy to load images
+    if (kIsWeb && !img.contains('corsproxy')) {
+      img = 'https://corsproxy.io/?${Uri.encodeComponent(img)}';
     }
     
     return Article(

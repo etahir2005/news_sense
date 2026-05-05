@@ -3,6 +3,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:provider/provider.dart';
 import '../providers/news_provider.dart';
 import '../services/bookmarks_service.dart';
+import '../services/stats_service.dart';
 import '../models/article.dart';
 import 'article_webview_screen.dart';
 
@@ -22,6 +23,7 @@ class _SwipeNewsScreenState extends State<SwipeNewsScreen> {
 
   void _open(Article article) {
     if (article.url.isNotEmpty) {
+      StatsService().logArticleRead(article.id, article.sourceName, article.summary.split(' ').length);
       Navigator.push(context, MaterialPageRoute(builder: (_) => ArticleWebViewScreen(url: article.url, title: article.sourceName)));
     }
   }
@@ -63,7 +65,46 @@ class _SwipeNewsScreenState extends State<SwipeNewsScreen> {
             },
             itemBuilder: (context, index) {
               final article = provider.articles[index];
-              return _buildSwipeCard(article, context);
+              return Dismissible(
+                key: Key(article.id),
+                direction: DismissDirection.horizontal,
+                confirmDismiss: (direction) async {
+                  if (direction == DismissDirection.startToEnd) {
+                    // Right swipe = Save
+                    _save(article, context);
+                  }
+                  // Move to next page vertically
+                  _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+                  return false; // Spring back horizontally
+                },
+                background: Container(
+                  color: Colors.green.withOpacity(0.8),
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 40),
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.bookmark_add, color: Colors.white, size: 60),
+                      SizedBox(height: 10),
+                      Text('SAVE', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                secondaryBackground: Container(
+                  color: Colors.red.withOpacity(0.8),
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 40),
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.close, color: Colors.white, size: 60),
+                      SizedBox(height: 10),
+                      Text('DISMISS', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                child: _buildSwipeCard(article, context),
+              );
             },
           );
         },
@@ -132,9 +173,9 @@ class _SwipeNewsScreenState extends State<SwipeNewsScreen> {
                   children: [
                     const Row(
                       children: [
-                        Icon(Icons.swipe_up, color: Colors.white54, size: 20),
+                        Icon(Icons.swipe, color: Colors.white54, size: 20),
                         SizedBox(width: 8),
-                        Text('Swipe for next', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                        Text('Swipe ⬅️ ➡️ or ⬆️', style: TextStyle(color: Colors.white54, fontSize: 12)),
                       ],
                     ),
                     ElevatedButton.icon(

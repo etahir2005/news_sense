@@ -1,17 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/article.dart';
 
 class NewsService {
-  final String _apiKey = 'pub_bf238dc1d2904fc186cdbd12799cc10d';
+  final String _apiKey = dotenv.env['NEWSDATA_API_KEY'] ?? 'pub_bf238dc1d2904fc186cdbd12799cc10d';
   final String _baseUrl = 'https://newsdata.io/api/1/news';
 
   // Fetches live news with pagination, categorization, semantic search, and global/local toggle
-  Future<Map<String, dynamic>> fetchLiveNews({String? nextPage, String query = '', String category = 'top', bool isGlobal = false}) async {
+  Future<Map<String, dynamic>> fetchLiveNews({String? nextPage, String query = '', String category = 'top', bool isGlobal = false, String? country}) async {
     String url = '$_baseUrl?apikey=$_apiKey&language=en';
     
-    // Toggle between Pakistan and Worldwide
-    if (!isGlobal) {
+    // Toggle between specific country, Pakistan, and Worldwide
+    if (country != null) {
+      url += '&country=$country';
+    } else if (!isGlobal) {
       url += '&country=pk';
     }
 
@@ -20,8 +23,7 @@ class NewsService {
     }
     if (query.isNotEmpty) {
       url += '&q=$query';
-    } else if (!isGlobal) {
-      // If no query and local, ensure it's heavily pakistan focused
+    } else if (!isGlobal && country == null) {
       url += '&q=pakistan';
     }
     

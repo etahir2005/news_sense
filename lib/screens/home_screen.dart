@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  String _moodFilter = 'All'; // Unique: Mood-based filtering
+  String _moodFilter = 'All';
 
   final List<String> _categories = ['top', 'politics', 'business', 'technology', 'sports', 'entertainment'];
   final List<String> _moods = ['All', 'Positive', 'Neutral', 'Negative'];
@@ -68,7 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('NewsSense', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-                              // Global/Local Toggle
                               Consumer<NewsProvider>(
                                 builder: (context, provider, child) {
                                   return Container(
@@ -80,8 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        _buildToggleBtn('Local', !provider.isGlobal, () => provider.setGlobal(false)),
-                                        _buildToggleBtn('Global', provider.isGlobal, () => provider.setGlobal(true)),
+                                        _buildToggleBtn('🏠 Local', !provider.isGlobal, () => provider.setGlobal(false)),
+                                        _buildToggleBtn('🌍 Global', provider.isGlobal, () => provider.setGlobal(true)),
                                       ],
                                     ),
                                   );
@@ -89,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               )
                             ],
                           ),
-                          const Text('Smart AI Insights & Radar', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                          const Text('Smart AI Insights & Credibility Radar', style: TextStyle(color: Colors.white70, fontSize: 13)),
                         ],
                       ),
                     ),
@@ -101,35 +100,39 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         body: Column(
           children: [
-            // Search Bar
+            // Search Bar — dynamic hint
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search Pakistan news...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            context.read<NewsProvider>().setSearch('');
-                            setState(() {});
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: isDark ? const Color(0xFF1E1E2E) : Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                ),
-                onChanged: (val) => setState(() {}),
-                onSubmitted: (val) {
-                  context.read<NewsProvider>().setSearch(val);
+              child: Consumer<NewsProvider>(
+                builder: (context, provider, child) {
+                  return TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: provider.isGlobal ? 'Search global news...' : 'Search local news...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                context.read<NewsProvider>().setSearch('');
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF1E1E2E) : Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    ),
+                    onChanged: (val) => setState(() {}),
+                    onSubmitted: (val) {
+                      context.read<NewsProvider>().setSearch(val);
+                    },
+                  );
                 },
               ),
             ),
@@ -173,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
 
-            // Mood Filter — UNIQUE FEATURE
+            // Mood Filter
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               child: Row(
@@ -182,30 +185,38 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(width: 6),
                   Text('Mood:', style: TextStyle(fontSize: 13, color: Colors.grey[600])),
                   const SizedBox(width: 8),
-                  ..._moods.map((mood) {
-                    final isActive = _moodFilter == mood;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: InkWell(
-                        onTap: () => setState(() => _moodFilter = mood),
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: isActive ? const Color(0xFF667eea).withOpacity(0.15) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isActive ? const Color(0xFF667eea) : Colors.grey.withOpacity(0.3),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _moods.map((mood) {
+                          final isActive = _moodFilter == mood;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: InkWell(
+                              onTap: () => setState(() => _moodFilter = mood),
+                              borderRadius: BorderRadius.circular(20),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: isActive ? const Color(0xFF667eea).withOpacity(0.15) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isActive ? const Color(0xFF667eea) : Colors.grey.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  mood == 'All' ? '🌐 All' : mood == 'Positive' ? '😊' : mood == 'Negative' ? '😟' : '😐',
+                                  style: TextStyle(fontSize: 13, fontWeight: isActive ? FontWeight.bold : FontWeight.normal),
+                                ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            mood == 'All' ? '🌐 All' : mood == 'Positive' ? '😊' : mood == 'Negative' ? '😟' : '😐',
-                            style: TextStyle(fontSize: 13, fontWeight: isActive ? FontWeight.bold : FontWeight.normal),
-                          ),
-                        ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -215,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Consumer<NewsProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading) {
-                    return _buildShimmerLoader();
+                    return _buildShimmerLoader(isDark);
                   }
 
                   if (provider.errorMessage != null && provider.articles.isEmpty) {
@@ -225,12 +236,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.wifi_off, size: 60, color: Colors.grey),
-                            const SizedBox(height: 16),
-                            const Text('Could not connect to news service.', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
-                            const SizedBox(height: 8),
-                            Text('Check your internet or try again.', style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                            Container(
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.wifi_off, size: 50, color: Colors.redAccent),
+                            ),
                             const SizedBox(height: 20),
+                            const Text('Could not connect', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            Text('Check your internet connection and try again.', style: TextStyle(color: Colors.grey[500], fontSize: 13), textAlign: TextAlign.center),
+                            const SizedBox(height: 24),
                             ElevatedButton.icon(
                               onPressed: () => provider.fetchInitialNews(),
                               icon: const Icon(Icons.refresh),
@@ -239,6 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 backgroundColor: const Color(0xFF667eea),
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                               ),
                             ),
                           ],
@@ -247,7 +266,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   }
 
-                  // Apply mood filter
                   final filtered = _moodFilter == 'All'
                       ? provider.articles
                       : provider.articles.where((a) => a.sentiment == _moodFilter).toList();
@@ -260,9 +278,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           const Text('🤷', style: TextStyle(fontSize: 50)),
                           const SizedBox(height: 12),
                           Text(
-                            _moodFilter != 'All' ? 'No $_moodFilter news found.' : 'No articles found.',
+                            _moodFilter != 'All' ? 'No $_moodFilter news right now.' : 'No articles found.',
                             style: const TextStyle(fontSize: 16),
                           ),
+                          if (_moodFilter != 'All') ...[
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () => setState(() => _moodFilter = 'All'),
+                              child: const Text('Show all moods'),
+                            ),
+                          ],
                         ],
                       ),
                     );
@@ -295,43 +320,60 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildShimmerLoader() {
+  Widget _buildShimmerLoader(bool isDark) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: 4,
       itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 20),
-          height: 280,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.grey.withOpacity(0.1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 160,
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.3, end: 1.0),
+          duration: Duration(milliseconds: 800 + (index * 200)),
+          curve: Curves.easeInOut,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                height: 280,
                 decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                  color: Colors.grey.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.withOpacity(0.08),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(height: 14, width: double.infinity, color: Colors.grey.withOpacity(0.15)),
-                    const SizedBox(height: 8),
-                    Container(height: 14, width: 200, color: Colors.grey.withOpacity(0.15)),
-                    const SizedBox(height: 12),
-                    Container(height: 10, width: 100, color: Colors.grey.withOpacity(0.1)),
+                    Container(
+                      height: 160,
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.grey.withOpacity(0.1),
+                            Colors.grey.withOpacity(0.2),
+                            Colors.grey.withOpacity(0.1),
+                          ],
+                          stops: [0.0, value * 0.5, 1.0],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(height: 14, width: double.infinity, decoration: BoxDecoration(color: Colors.grey.withOpacity(0.15), borderRadius: BorderRadius.circular(4))),
+                          const SizedBox(height: 8),
+                          Container(height: 14, width: 200, decoration: BoxDecoration(color: Colors.grey.withOpacity(0.12), borderRadius: BorderRadius.circular(4))),
+                          const SizedBox(height: 12),
+                          Container(height: 10, width: 100, decoration: BoxDecoration(color: Colors.grey.withOpacity(0.08), borderRadius: BorderRadius.circular(4))),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -340,7 +382,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildToggleBtn(String label, bool isActive, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isActive ? Colors.white : Colors.transparent,

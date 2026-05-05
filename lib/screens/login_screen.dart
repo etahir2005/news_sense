@@ -37,6 +37,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   void dispose() {
     _animController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -61,8 +63,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       _showSnack('Please fill all fields to sign up.', Colors.orange);
       return;
     }
-    if (_passwordController.text.length < 4) {
-      _showSnack('Password must be at least 4 characters.', Colors.orange);
+    if (_passwordController.text.length < 6) {
+      _showSnack('Password must be at least 6 characters.', Colors.orange);
       return;
     }
     setState(() => _isLoading = true);
@@ -70,9 +72,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     setState(() => _isLoading = false);
 
     if (success) {
-      _showSnack('✅ Account created! Now log in.', const Color(0xFF2ECC71));
+      if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainNavigation()));
     } else {
-      _showSnack('Account already exists. Try logging in.', Colors.redAccent);
+      _showSnack('Account already exists or invalid email format.', Colors.redAccent);
     }
   }
 
@@ -155,6 +157,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                               filled: true,
                               fillColor: Colors.grey[50],
+                              helperText: 'Min 6 characters',
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -194,6 +197,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ],
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    Text('Powered by Firebase & AI', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
                   ],
                 ),
               ),

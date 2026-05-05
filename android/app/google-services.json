@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "702593551954",
+    "project_id": "newssense-4483e",
+    "storage_bucket": "newssense-4483e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702593551954:android:d138beb4b6fba7aeda998b",
+        "android_client_info": {
+          "package_name": "com.example.news_sense"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0t69gCld5dq-EyPOQlzQkJOQgOo7yqnM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

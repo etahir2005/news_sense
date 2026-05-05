@@ -4,6 +4,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/news_provider.dart';
 import '../services/auth_service.dart';
+import '../services/stats_service.dart';
+import '../services/opinion_service.dart';
 import '../models/article.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -18,6 +20,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _healthyDiet = false;
   String _userEmail = 'Loading...';
   int _readingStreak = 0;
+  int _totalArticlesRead = 0;
+  int _totalReadTimeMins = 0;
+  int _mindChangedCount = 0;
+  String _topMindChangedTopic = 'None';
 
   @override
   void initState() {
@@ -28,9 +34,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _fetchUser() async {
-    final email = await AuthService().getCurrentUser();
-    if (email != null && mounted) {
-      setState(() => _userEmail = email);
+    final email = await AuthService().getCurrentUserEmail();
+    final stats = await StatsService().getUserStats();
+    final opinions = await OpinionService().getMindChangedStats();
+    if (mounted) {
+      setState(() {
+        if (email != null) _userEmail = email;
+        _totalArticlesRead = stats['totalArticlesRead'] ?? 0;
+        _totalReadTimeMins = stats['totalReadTimeMins'] ?? 0;
+        _mindChangedCount = opinions['totalChanged'] ?? 0;
+        _topMindChangedTopic = opinions['topTopic'] ?? 'None';
+      });
     }
   }
 
@@ -279,12 +293,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          _statCard('📰', '$total', 'Articles\nToday', isDark),
+                          _statCard('📰', '$_totalArticlesRead', 'Articles\nRead', isDark),
+                          const SizedBox(width: 12),
+                          _statCard('⏱️', '$_totalReadTimeMins', 'Minutes\nRead', isDark),
                           const SizedBox(width: 12),
                           _statCard('🔥', '$_readingStreak', 'Day\nStreak', isDark),
-                          const SizedBox(width: 12),
-                          _statCard('📊', total > 0 ? '${posPct.toStringAsFixed(0)}%' : '0%', 'Positive\nRatio', isDark),
                         ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Mind Changed Feature
+                      const Text('Mind Tracker', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 15, offset: const Offset(0, 5))],
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.psychology, size: 40, color: Colors.blueAccent),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Persuasion Index', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _mindChangedCount > 0 
+                                      ? 'You changed your mind on $_mindChangedCount articles. You are most open-minded about $_topMindChangedTopic.'
+                                      : 'You haven\'t changed your mind on any articles yet. Stay open!',
+                                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 32),
 
