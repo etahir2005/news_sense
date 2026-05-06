@@ -113,8 +113,10 @@ class _CountryCardState extends State<_CountryCard> with SingleTickerProviderSta
   Future<void> _fetchTopHeadline() async {
     try {
       // Pass isGlobal: true so no Pakistan query leaks in
+      // Also pass the country name as the query to strictly filter news about this country
       final res = await _service.fetchLiveNews(
         country: widget.country['code'],
+        query: widget.country['name']!,
         category: 'top',
         isGlobal: true,
       );
@@ -306,6 +308,7 @@ class _CountryHeadlinesScreenState extends State<CountryHeadlinesScreen> {
     try {
       final res = await _service.fetchLiveNews(
         country: widget.countryCode,
+        query: widget.countryName,
         category: 'top',
         isGlobal: true,
       );

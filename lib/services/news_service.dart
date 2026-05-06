@@ -22,7 +22,7 @@ class NewsService {
       url += '&category=$category';
     }
     if (query.isNotEmpty) {
-      url += '&q=$query';
+      url += '&q=${Uri.encodeComponent(query)}';
     } else if (!isGlobal && country == null) {
       url += '&q=pakistan';
     }
