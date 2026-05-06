@@ -11,15 +11,14 @@ void main() async {
   await dotenv.load(fileName: ".env");
   
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
   } catch (e) {
-    print("Firebase initialization error or flutterfire configure not run: $e");
-    // Fallback if not configured properly yet
-    try {
-      await Firebase.initializeApp();
-    } catch(e) {}
+    print("Firebase initialization error: $e");
+    // Continue running the app even if Firebase fails so the UI/News works!
   }
 
   runApp(
